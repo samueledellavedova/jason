@@ -1,0 +1,22 @@
+{
+  "name": "@samueledellavedova/jason",
+  "version": "0.1.0",
+  "description": "Jason, a JSON file based database.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Samuele Della Vedova",
+  "license": "CC-BY-NC-ND-4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samueledellavedova/jason"
+  },
+  "bugs": {
+    "url": "https://github.com/samueledellavedova/jason/issues"
+  },
+  "homepage": "https://github.com/samueledellavedova/jason#readme"
+}
