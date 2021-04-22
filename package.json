@@ -1,6 +1,6 @@
 {
   "name": "@samueledellavedova/jason",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Jason, a JSON file based database.",
   "main": "index.js",
   "directories": {
