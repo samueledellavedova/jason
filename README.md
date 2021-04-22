@@ -123,7 +123,7 @@ await db.collection('users').deleteByID('1234567890');
 ### Benchmark
 To validate the following results you can clone this repository and run:
 ```bash
-$ node benchmark/index.js
+$ node benchmark
 ```
 ### Results
 Average results of a few benchmarks:
