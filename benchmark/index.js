@@ -1,4 +1,5 @@
 const Jason = require('../lib');
+const { performance: Performance } = require('perf_hooks');
 
 (async () => {
   const sizes = [ 1, 10, 100, 1000, 10000 ];
@@ -16,42 +17,47 @@ const Jason = require('../lib');
         age: Math.floor(Math.random() * 10),
         address: 'Idk'
       });
+      
+    const collection = db.collection('users');
     
     const run = async (op, instruction, deleted) => {
       console.log(`[Size: ${size}] [Operation: ${op}] Running...`);
 
-      const start = Date.now();
-      deleted = await eval(instruction);
-      const finish = Date.now() - start;
+      const start = Performance.now();
 
-      if (instruction.includes(').delete') && deleted) {
+      if (op === 'Delete Collection') await instruction.run.call(db, ...instruction.args);
+      else deleted = await instruction.run.call(collection, ...(instruction.args || []));
+
+      const finish = Performance.now() - start;
+
+      if (op.includes('Delete') && deleted) {
         console.log(`[Size: ${size}] Recreating deleted documents...`);
-        await run('Bulk Create', 'db.collection(\'users\').create(deleted);', deleted);
+        await run('Bulk Create', { run: collection.create, args: [ deleted ] }, deleted);
       }
 
-      return finish + 'ms';
+      return finish.toFixed(0) + 'ms';
     };
-
+    
     const operations = {
-      'Bulk Create': 'db.collection(\'users\').create(users);',
-      'Count': 'db.collection(\'users\').count();',
-      
-      'Find All': 'db.collection(\'users\').find();',
-      'Find All (with filter)': 'db.collection(\'users\').find({ age: 5 });',
-      'Find One': 'db.collection(\'users\').findOne();',
-      'Find One (with filter)': 'db.collection(\'users\').findOne({ age: 5 });',
-  
-      'Update All': 'db.collection(\'users\').update({}, { address: \'Now I know the address\' });',
-      'Update All (with filter)': 'db.collection(\'users\').update({ age: 5 }, { address: \'I forgot the address\' });',
-      'Update One': 'db.collection(\'users\').updateOne({}, { address: \'Some address here\' });',
-      'Update One (with filter)': 'db.collection(\'users\').updateOne({ age: 5 }, { address: \'Huh?\' });',
-  
-      'Delete All': 'db.collection(\'users\').delete();',
-      'Delete All (with filter)': 'db.collection(\'users\').delete({ age: 5 });',
-      'Delete One': 'db.collection(\'users\').deleteOne();',
-      'Delete One (with filter)': 'db.collection(\'users\').deleteOne({ age: 5 });',
-  
-      'Delete Collection': 'db.delete(\'users\');'
+      'Bulk Create': { run: collection.create, args: [ users ] },
+      'Count': { run: collection.count },
+
+      'Find All': { run: collection.find },
+      'Find All (with filter)': { run: collection.find, args: [ { age: 5 } ] },
+      'Find One': { run: collection.findOne },
+      'Find One (with filter)': { run: collection.findOne, args: [ { age: 5 } ] },
+
+      'Update All': { run: collection.update, args: [ {}, { address: 'Now I know the address' } ] },
+      'Update All (with filter)': { run: collection.update, args: [ { age: 5 }, { address: 'I forgot the address' } ] },
+      'Update One': { run: collection.updateOne, args: [ {}, { address: 'Some address here' } ] },
+      'Update One (with filter)': { run: collection.updateOne, args: [ { age: 5 }, { address: 'Huh?' } ] },
+
+      'Delete All': { run: collection.delete },
+      'Delete All (with filter)': { run: collection.delete, args: [ { age: 5 } ] },
+      'Delete One': { run: collection.deleteOne },
+      'Delete One (with filter)': { run: collection.deleteOne, args: [ { age: 5 } ] },
+
+      'Delete Collection': { run: db.delete, args: [ 'users' ] }
     };
 
     for (const op in operations) {
